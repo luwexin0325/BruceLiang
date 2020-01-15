@@ -1,7 +1,23 @@
 package com.demo.demo.controller.excel;
+
+import com.demo.demo.entity.Content;
+import com.demo.demo.upload.ExportExcel;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * @author luwenxin
@@ -9,10 +25,57 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Slf4j
 @RestController
-@RequestMapping("/importExcel")
+@RequestMapping("/upload/importExcel")
 public class ImportExcelController {
+
+    public String importTest() {
+        log.info("您已经入");
+        log.error("--error---");
+        return "<input value='你好' disable='disable'>";
+    }
+
     @RequestMapping("/import")
-    public String importTest(){
-        return "<input value='你好'>";
+    public static void importIoFile() throws IOException {
+        log.info("=============开始读取excel===========");
+        File file = new File("D:\\Downloads\\2020.xlsx");
+        System.out.println("file==" + file);
+        //获得该文件的输入流
+        FileInputStream stream = new FileInputStream(file);
+        // 多态  抛异常
+        Workbook sheets = new XSSFWorkbook(stream);
+        //获取一个工作表(sheet页)，下标从0开始
+        Sheet sheet = sheets.getSheetAt(0);
+        for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+
+            // 获取行数
+            Row row = sheet.getRow(i);
+            // 获取单元格 取值
+            String value1 = row.getCell(0).getStringCellValue();
+            String value2 = row.getCell(1).getStringCellValue();
+            String value3 = row.getCell(2).getStringCellValue();
+            String value4 = row.getCell(3).getStringCellValue();
+            String value5 = row.getCell(4).getStringCellValue();
+
+            System.out.print(value1 + "  ");
+            System.out.print(value2 + "  ");
+            System.out.print(value3 + "  ");
+            System.out.print(value4 + "  ");
+            System.out.print(value5);
+        }
+
+
+        //关流
+        sheets.close();
+        stream.close();
+        log.info("===读取完毕====");
+    }
+
+    @PostMapping("/upload")
+    public String importExcel(@RequestParam("file") MultipartFile file) throws IOException {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("tname", "名称（必填）");
+        map.put("ttime", "时间（YYYY-MM）");
+        ExportExcel.toList(file.getInputStream(), Content.class, map);
+        return "上传成功";
     }
 }
