@@ -1,10 +1,9 @@
-package com.demo.demo.mapper;
+package mapper;
 
-import com.demo.demo.entity.Content;
-import com.demo.demo.service.ContentExample;
-import org.apache.ibatis.annotations.Param;
-
+import entity.Content;
+import entity.ContentExample;
 import java.util.List;
+import org.apache.ibatis.annotations.Param;
 
 public interface ContentMapper {
     long countByExample(ContentExample example);

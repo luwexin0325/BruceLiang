@@ -1,22 +1,29 @@
 package com.demo.demo.controller.excel;
 
-import com.demo.demo.entity.Content;
+import com.demo.demo.dto.ContentDto;
+import com.demo.demo.service.ContentService;
 import com.demo.demo.upload.ExportExcel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,12 +35,20 @@ import java.util.Map;
 @RequestMapping("/upload/importExcel")
 public class ImportExcelController {
 
+    @Autowired
+    private ContentService contentService;
+
     public String importTest() {
         log.info("您已经入");
         log.error("--error---");
         return "<input value='你好' disable='disable'>";
     }
 
+    /**
+     * @author: LWX
+     * @date: 2020/1/15 14:13
+     * xlsx2017
+     */
     @RequestMapping("/import")
     public static void importIoFile() throws IOException {
         log.info("=============开始读取excel===========");
@@ -70,12 +85,39 @@ public class ImportExcelController {
         log.info("===读取完毕====");
     }
 
+    /**
+     * @author: LWX
+     * @date: 2020/1/15 14:13
+     * 内容Excel模板下载
+     */
+    @GetMapping("/getExcel")
+    public ResponseEntity<byte[]> templateDownload() throws IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "attachment;filename*=utf-8''" + URLEncoder.encode("内容导入模板.xls", "UTF-8"));
+        ClassPathResource cpr = new ClassPathResource("excel/内容导入模板.xls");
+        byte[] bytes = FileCopyUtils.copyToByteArray(cpr.getInputStream());
+        ResponseEntity<byte[]> response = new ResponseEntity<>(bytes, headers, HttpStatus.CREATED);
+        return response;
+    }
+
+    /**
+     * @author: LWX
+     * @date: 2020/1/15 14:13
+     * xls2013
+     */
     @PostMapping("/upload")
     public String importExcel(@RequestParam("file") MultipartFile file) throws IOException {
         Map<String, String> map = new LinkedHashMap<>();
-        map.put("tname", "名称（必填）");
-        map.put("ttime", "时间（YYYY-MM）");
-        ExportExcel.toList(file.getInputStream(), Content.class, map);
+        map.put("tid", "编号");
+        map.put("tname", "名称");
+        map.put("ttime", "时间");
+        List<ContentDto> list = ExportExcel.toList(file.getInputStream(), ContentDto.class, map);
+        list.forEach(content -> {
+            Map<String, String> result = contentService.insert(content);
+            log.info("result===" + result.toString());
+//            Optional.ofNullable(content).ifPresent(result->);
+        });
+        log.info("==========content=======" + list.toString());
         return "上传成功";
     }
 }
