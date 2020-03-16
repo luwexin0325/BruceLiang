@@ -88,6 +88,7 @@
         var data = {msg:$("#ip"+user_st).val(),toUser:user_st,fromUser:sToken}
         sendMessage(JSON.stringify(data))
         $("#"+user_st).append('<tr><td></td><td>'+$("#ip"+user_st).val()+'</td></tr>')
+        $("#msg").val("");
     }
     function sendMessage(data) {
         if(typeof(WebSocket) == "undefined") {
