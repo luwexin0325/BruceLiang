@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>管理员scoket</title>
+</head>
+<body id="body">
+<h1>当前用户：<span id="userCount"></span></h1>
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js"></script>
+<script>
+    var socket;
+    var sToken;
+    var user_sToken = []
+    var userCount = 0
+    $(function(){
+
+        getStoken();
+        initSocket();
+        $("#userCount").html(0)
+
+    })
+    // 获取sToken
+    function getStoken(){
+        // 模拟sToken,测试使用管理员sToken(ADMIN开头，000结尾),真实环境掉接口获取sToken
+        sToken = "ADMIN1000"
+    }
+    // 初始化socket
+    function initSocket(){
+        if(typeof(WebSocket) == "undefined") {
+            console.log("您的浏览器不支持WebSocket");
+            alert("您的浏览器不支持WebSocket");
+        }else{
+            console.log("您的浏览器支持WebSocket");
+            var socketUrl="http://localhost:0325/websocket/"+sToken;
+            socketUrl=socketUrl.replace("https","ws").replace("http","ws");
+            console.log(socketUrl);
+            if(socket!=null){
+                socket.close();
+                socket=null;
+            }
+            socket = new WebSocket(socketUrl);
+            //打开事件
+            socket.onopen = function() {
+                console.log("websocket已打开");
+                alert("socket打开成功")
+            };
+            //获得消息事件
+            socket.onmessage = function(msg) {
+                console.log(msg.data);
+                var data = JSON.parse(msg.data)
+                if(data.code != 0){
+                    alert(data.msg)
+                    return;
+                }
+                console.log(data)
+                console.log(user_sToken)
+                if($.inArray(data.fromUser,user_sToken) >= 0){
+                    $("#"+data.fromUser).append('<tr><td>'+data.msg+'</td><td><td></tr>')
+                    console.log('table添加新记录')
+                }else {
+                    // 新用户消息
+                    console.log('创建新table')
+                    $("#body").append('<table style="margin-top:10px" border="2" bordercolor="black" width="500" cellspacing="0" cellpadding="5" id='+data.fromUser+'></table>')
+                    $("#"+data.fromUser).append('<tr><td>通信用户：'+data.userName+data.mobile+'</td><td>用户sToken：'+data.fromUser+'</td></tr>')
+                    $("#"+data.fromUser).append('<tr><td colspan="2"><input id=ip'+data.fromUser+' type="text"><button data-st='+data.fromUser+' onclick="sendMsg(this)">发送</button></td></tr>')
+                    $("#"+data.fromUser).append('<tr><td>用户</td><td>我</td></tr>')
+                    $("#"+data.fromUser).append('<tr><td>'+data.msg+'</td><td><td></tr>')
+                    user_sToken.push(data.fromUser)
+                    userCount++
+                    $("#userCount").html(userCount)
+                }
+            };
+            //关闭事件
+            socket.onclose = function() {
+                console.log("websocket已关闭");
+            };
+            //发生了错误事件
+            socket.onerror = function() {
+                console.log("websocket发生了错误");
+            }
+        }
+    }
+    function sendMsg(e){
+        var user_st = e.getAttribute("data-st")
+        console.log(user_st)
+        console.log($("#ip"+user_st).val())
+        var data = {msg:$("#ip"+user_st).val(),toUser:user_st,fromUser:sToken}
+        sendMessage(JSON.stringify(data))
+        $("#"+user_st).append('<tr><td></td><td>'+$("#ip"+user_st).val()+'</td></tr>')
+    }
+    function sendMessage(data) {
+        if(typeof(WebSocket) == "undefined") {
+            console.log("您的浏览器不支持WebSocket");
+        }else {
+            console.log("您的浏览器支持WebSocket");
+            console.log('{"toUserId":"'+$("#toUserId").val()+'","contentText":"'+$("#contentText").val()+'"}');
+            socket.send(data);
+        }
+    }
+</script>
+</html>
+

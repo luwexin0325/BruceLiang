@@ -1,11 +1,14 @@
 package com.demo.demo;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+//@RunWith(SpringRunner.class)
 @SpringBootTest
 class DemoApplicationTests {
 
@@ -46,6 +49,7 @@ class DemoApplicationTests {
         System.out.println("所有数之和 : " + getSum(integers));
         System.out.println("平均数 : " + getAverage(integers));
         System.out.println("随机数: ");
+
 
         // 输出10个随机数
         Random random = new Random();
@@ -189,6 +193,16 @@ class DemoApplicationTests {
 
     private static int getAverage(List<Integer> numbers) {
         return getSum(numbers) / numbers.size();
+    }
+
+    @Test
+    void test() {
+        Integer i1 = 100;
+        Integer i2 = 100;
+        Integer i3 = 200;
+        Integer i4 = 200;
+        System.out.println(i1 == i2);
+        System.out.println(i3 == i4);
     }
 
 }

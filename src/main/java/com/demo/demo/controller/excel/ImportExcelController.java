@@ -2,6 +2,7 @@ package com.demo.demo.controller.excel;
 
 import com.demo.demo.dto.ContentDto;
 import com.demo.demo.service.ContentService;
+import com.demo.demo.service.Impl.ContentServiceImpl;
 import com.demo.demo.upload.ExportExcel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
@@ -36,7 +37,7 @@ import java.util.Map;
 public class ImportExcelController {
 
     @Autowired
-    private ContentService contentService;
+    private ContentServiceImpl contentService;
 
     public String importTest() {
         log.info("您已经入");
