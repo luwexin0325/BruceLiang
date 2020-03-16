@@ -88,6 +88,7 @@
         var data = {userName:userName,mobile:mobile,msg:msg,toUser:admin_sToken,fromUser:sToken}
         sendMessage(JSON.stringify(data))
         $("#msgTable").append('<tr><td></td><td>'+msg+'</td></tr>')
+        $("#msg").val("");
     }
     function sendMessage(data) {
         if(typeof(WebSocket) == "undefined") {
